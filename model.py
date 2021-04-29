@@ -39,4 +39,11 @@ class Batch:
     @property
     def available_quantity(self) -> int:
         return self._purchased_quantity - self.allocated_quantity
-        
+    
+    def __eq__(self, other):
+        if not isinstance(other, Batch):
+            return False
+        return other.reference == self.reference
+    
+    def __hash__(self):
+        return hash(self.reference)
