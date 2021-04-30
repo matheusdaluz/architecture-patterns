@@ -1,4 +1,6 @@
-#!/home/matheus/projetos/architecture-patterns/venv/bin/python3
+#!/bin/sh
+'''exec' "/Users/matheus.costa/Desktop/Documentos - Mac mini de Matheus/patterns-architecture/venv/bin/python3" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
