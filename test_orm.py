@@ -1,4 +1,3 @@
-from sqlalchemy.connectors import session
 import model
 
 
@@ -12,7 +11,7 @@ def test_orderline_mapper_can_load_lines(session):
 
     expected = [
         model.OrderLine("order1", "RED-CHAIR", 12),
-        model.OrderLine("order2", "RED-TABLE", 13)
+        model.OrderLine("order2", "RED-TABLE", 13),
         model.OrderLine("order3", "BLUE-LIPSTICK", 14)
     ]
 
@@ -25,6 +24,6 @@ def test_orderline_mapper_can_save_lines(session):
     session.commit()
 
     rows = list(session.execute(
-        'SELECT orderid, skuy, qty FROM "order_lines"'))
+        'SELECT orderid, sku, qty FROM "order_lines"'))
 
     assert rows == [("order1", "DECORATIVE-WIDGET", 12)]

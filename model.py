@@ -7,7 +7,7 @@ Sku = NewType("Sku", str)
 Reference = NewType("Reference", str)
 
 
-@dataclass(frozen=True)
+@dataclass(unsafe_hash=True)
 class OrderLine:
     orderid: str
     sku: Sku
