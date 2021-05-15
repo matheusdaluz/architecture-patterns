@@ -1,2 +1,5 @@
 pytest
 sqlalchemy
+psycopg2-binary
+flask
+requests
