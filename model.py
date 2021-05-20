@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, NewType, List
 from datetime import date
+from typing import Optional, NewType, List
 
 Quantity = NewType("Quantity", int)
 Sku = NewType("Sku", str)
@@ -66,7 +66,7 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
         batch.allocate(line)
     except StopIteration:
         raise OutOfStock(f'Out of stock for sku {line.sku}')
-    
+
     return batch.reference
 
 

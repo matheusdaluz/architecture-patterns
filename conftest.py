@@ -12,7 +12,6 @@ from orm import metadata, start_mappers
 import config
 
 
-
 @pytest.fixture
 def in_memory_db():
     engine = create_engine("sqlite:///:memory:")
@@ -98,3 +97,10 @@ def add_stock(postgres_session):
             "DELETE FROM order_lines WHERE sku=:sku", dict(sku=sku),
         )
         postgres_session.commit()
+
+
+@pytest.fixture
+def restart_api():
+    (Path(__file__).parent / "flask_app.py").touch()
+    time.sleep(0.5)
+    wait_for_webapp_to_come_up()
