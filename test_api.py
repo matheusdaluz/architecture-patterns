@@ -37,7 +37,7 @@ def test_api_returns_allocation(add_stock):
     data = {'orderid': random_orderid(), 'sku': sku, 'qty': 3}
 
     url = config.get_api_url()
-    r = requests.get(f'{url}/allocate', json=data)
+    r = requests.post(f'{url}/allocate', json=data)
 
     assert r.status_code == 201
     assert r.json()['batchref'] == earlybatch

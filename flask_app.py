@@ -32,7 +32,7 @@ def allocate_endpoint():
     try:
         batchref = model.allocate(line, batches)
     except model.OutOfStock as e:
-        return jsonify({'message': str(e)})
+        return jsonify({'message': str(e)}), 400
 
     session.commit()
     return jsonify({'batchref': batchref}), 201
