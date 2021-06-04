@@ -9,13 +9,17 @@ import config
 
 
 DEFAULT_SESSION_FACTORY = sessionmaker(
-    bind=create_engine(config.get_postgres_uri(),))
+    bind=create_engine(
+        config.get_postgres_uri(),
+        isolation_level='REPEATABLE READ'
+    )
+)
 
 
 class AbstractUnitOfWork(abc.ABC):
-    batches = repository.AbstractRepository
+    products = repository.AbstractProductRepository
 
-    def __enter__(self)  -> AbstractUnitOfWork:
+    def __enter__(self) -> AbstractUnitOfWork:
         return self
 
     def __exit__(self, *args):
@@ -36,7 +40,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def __enter__(self):
         self.session = self.session_factory()
-        self.batches = repository.SqlAlchemyRepository(session=self.session)
+        self.products = repository.SqlAlchemyRepository(session=self.session)
         return super().__enter__()
 
     def __exit__(self, *args):

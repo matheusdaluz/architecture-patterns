@@ -3,7 +3,7 @@ import abc
 from domain import model
 
 
-class AbstractRepository(abc.ABC):
+class AbstractProductRepository(abc.ABC):
     @abc.abstractmethod
     def add(self, batch: model.Batch):
         raise NotImplementedError
@@ -13,15 +13,12 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
 
-class SqlAlchemyRepository(AbstractRepository):
+class SqlAlchemyRepository(AbstractProductRepository):
     def __init__(self, session):
         self.session = session
 
-    def add(self, batch):
-        self.session.add(batch)
+    def add(self, product):
+        self.session.add(product)
 
-    def get(self, reference):
-        return self.session.query(model.Batch).filter_by(reference=reference).one()
-
-    def list(self):
-        return self.session.query(model.Batch).all()
+    def get(self, sku):
+        return self.session.query(model.Product).filter_by(sku=sku).first()

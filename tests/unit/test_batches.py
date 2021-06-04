@@ -6,7 +6,7 @@ from domain.model import OrderLine, Batch
 def make_batch_and_line(sku, batch_qty, line_qty):
     return (
         Batch("batch-001", sku, batch_qty, eta=date.today),
-        OrderLine("order-123", sku, line_qty)
+        OrderLine("order-123", sku, line_qty),
     )
 
 
