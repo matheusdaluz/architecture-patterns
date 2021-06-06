@@ -1,7 +1,6 @@
 from domain import model
 from typing import Optional
 from datetime import date
-from adapters.repository import AbstractProductRepository
 from services import unit_of_work
 
 
