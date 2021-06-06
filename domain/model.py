@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
+from domain import events
 from typing import Optional, NewType, List
 
 Quantity = NewType("Quantity", int)
@@ -71,6 +72,7 @@ class Product:
         self.sku = sku
         self.batches = batches
         self.version_number = version_number
+        self.events = []  # type: List[events.Event]
 
     def allocate(self, line: OrderLine) -> str:
         try:
@@ -79,4 +81,5 @@ class Product:
             self.version_number += 1
             return batch.reference
         except StopIteration:
-            raise OutOfStock(f"Out of stock for sku {line.sku}")
+            self.events.append(events.OutOfStock(line.sku))
+            return None
