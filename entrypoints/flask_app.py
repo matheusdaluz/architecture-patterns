@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request
 
-from domain import model
+from domain import model, events
 from adapters import orm
-from services import services, unit_of_work
+from services import messagebus, unit_of_work, handlers
 from datetime import datetime
 
 
@@ -13,13 +13,12 @@ app = Flask(__name__)
 @app.route("/allocate", methods=["POST"])
 def allocate_endpoint():
     try:
-        batchref = services.allocate(
-            request.json["orderid"],
-            request.json["sku"],
-            request.json["qty"],
-            unit_of_work.SqlAlchemyUnitOfWork(),
+        event = events.AllocationRequired(
+            request.json["orderid"], request.json["sku"], request.json["qty"]
         )
-    except (model.OutOfStock, services.InvalidSku) as e:
+        results = messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())
+        batchref = results.pop(0)
+    except (model.OutOfStock, handlers.InvalidSku) as e:
         return jsonify({"message": str(e)}), 400
 
     return jsonify({"batchref": batchref}), 201
@@ -30,11 +29,8 @@ def add_batch():
     eta = request.json["eta"]
     if eta is not None:
         eta = datetime.fromisoformat(eta).date()
-    services.add_batch(
-        request.json["ref"],
-        request.json["sku"],
-        request.json["qty"],
-        eta,
-        unit_of_work.SqlAlchemyUnitOfWork(),
+    event = events.BatchCreated(
+        request.json["ref"], request.json["sku"], request.json["qty"], eta
     )
+    messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())
     return "OK", 201
