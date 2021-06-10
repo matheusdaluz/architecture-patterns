@@ -87,19 +87,21 @@ def test_changes_available_quantity():
 def test_reallocates_if_necessary():
     uow = FakeUnitOfWork()
     event_history = [
-        events.BatchCreated("batch1", "OMINOUS-MIRROR", 50, None),
-        events.BatchCreated("batch1", "OMINOUS-MIRROR", 50, date.today()),
-        events.AllocationRequired("order1", "OMINOUS-MIRROR", 20),
-        events.AllocationRequired("order2", "OMINOUS-MIRROR", 20),
+        events.BatchCreated("batch1", "INDIFFERENT-TABLE", 50, None),
+        events.BatchCreated("batch2", "INDIFFERENT-TABLE", 50, date.today()),
+        events.AllocationRequired("order1", "INDIFFERENT-TABLE", 20),
+        events.AllocationRequired("order2", "INDIFFERENT-TABLE", 20),
     ]
-
     for e in event_history:
         messagebus.handle(e, uow)
-
-    [batch1, batch2] = uow.products.get(sku="OMINOUS-MIRROR").batches
+    [batch1, batch2] = uow.products.get(sku="INDIFFERENT-TABLE").batches
     assert batch1.available_quantity == 10
     assert batch2.available_quantity == 50
 
     messagebus.handle(events.BatchQuantityChanged("batch1", 25), uow)
+
+    # order1 or order2 will be deallocated, so we'll have 25 - 20
     assert batch1.available_quantity == 5
+    # and 20 will be reallocated to the next batch
     assert batch2.available_quantity == 30
+
