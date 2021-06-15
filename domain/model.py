@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
-from domain import events
+from domain import events, commands
 from typing import Optional, NewType, List
 
 Quantity = NewType("Quantity", int)
@@ -93,5 +93,5 @@ class Product:
         while batch.available_quantity < 0:
             line = batch.deallocate_one()
             self.events.append(
-                events.AllocationRequired(line.orderid, line.sku, line.qty)
+                commands.Allocate(line.orderid, line.sku, line.qty)
             )

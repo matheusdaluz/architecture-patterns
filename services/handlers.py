@@ -1,4 +1,4 @@
-from domain import model, events
+from domain import model, events, commands
 from typing import Optional
 from datetime import date
 from services import unit_of_work
@@ -10,26 +10,26 @@ class InvalidSku(Exception):
 
 
 def add_batch(
-    event: events.BatchCreated,
+    cmd: commands.CreateBatch,
     uow: unit_of_work.AbstractUnitOfWork,
 ) -> None:
     with uow:
-        product = uow.products.get(sku=event.sku)
+        product = uow.products.get(sku=cmd.sku)
         if product is None:
-            product = model.Product(event.sku, batches=[])
+            product = model.Product(cmd.sku, batches=[])
             uow.products.add(product)
-        product.batches.append(model.Batch(event.ref, event.sku, event.qty, event.eta))
+        product.batches.append(model.Batch(cmd.ref, cmd.sku, cmd.qty, cmd.eta))
         uow.commit()
 
 
 def allocate(
-    event: events.AllocationRequired, uow: unit_of_work.AbstractUnitOfWork
+    cmd: commands.Allocate, uow: unit_of_work.AbstractUnitOfWork
 ) -> str:
-    line = model.OrderLine(event.orderid, event.sku, event.qty)
+    line = model.OrderLine(cmd.orderid, cmd.sku, cmd.qty)
     with uow:
         product = uow.products.get(sku=line.sku)
         if product is None:
-            raise InvalidSku(f"Invalid sku {event.sku}")
+            raise InvalidSku(f"Invalid sku {cmd.sku}")
         batchref = product.allocate(line)
         uow.commit()
     return batchref
@@ -42,9 +42,9 @@ def send_out_of_stock_notification(
 
 
 def change_batch_quantity(
-    event: events.BatchQuantityChanged, uow: unit_of_work.AbstractUnitOfWork
+    cmd: commands.ChangeBatchQuantity, uow: unit_of_work.AbstractUnitOfWork
 ):
     with uow:
-        product = uow.products.get_by_batchref(batchref=event.ref)
-        product.change_batch_quantity(ref=event.ref, qty=event.qty)
+        product = uow.products.get_by_batchref(batchref=cmd.ref)
+        product.change_batch_quantity(ref=cmd.ref, qty=cmd.qty)
         uow.commit()
