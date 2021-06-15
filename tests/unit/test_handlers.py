@@ -104,4 +104,3 @@ def test_reallocates_if_necessary():
     assert batch1.available_quantity == 5
     # and 20 will be reallocated to the next batch
     assert batch2.available_quantity == 30
-
