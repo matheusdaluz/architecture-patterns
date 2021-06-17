@@ -2,8 +2,8 @@ import json
 import pytest
 from tests.random_refs import random_orderid, random_sku, random_batchref
 from tenacity import Retrying, stop_after_delay
-from  tests.e2e.api_client import post_to_add_batch, post_to_allocate
-from  tests.e2e.redis_client import subscribe_to, publish_message
+from tests.e2e.api_client import post_to_add_batch, post_to_allocate
+from tests.e2e.redis_client import subscribe_to, publish_message
 
 
 @pytest.mark.usefixtures("postgres_db")
