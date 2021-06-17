@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import abc
-from adapters import repository
+from allocation.adapters import repository
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import config
+from allocation import config
 
 
 DEFAULT_SESSION_FACTORY = sessionmaker(

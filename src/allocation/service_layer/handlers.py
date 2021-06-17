@@ -1,8 +1,6 @@
-from domain import model, events, commands
-from typing import Optional
-from datetime import date
-from services import unit_of_work
-from adapters import email
+from allocation.domain import model, events, commands
+from allocation.service_layer import unit_of_work
+from allocation.adapters import email, redis_eventpublisher
 
 
 class InvalidSku(Exception):
@@ -22,9 +20,7 @@ def add_batch(
         uow.commit()
 
 
-def allocate(
-    cmd: commands.Allocate, uow: unit_of_work.AbstractUnitOfWork
-) -> str:
+def allocate(cmd: commands.Allocate, uow: unit_of_work.AbstractUnitOfWork) -> str:
     line = model.OrderLine(cmd.orderid, cmd.sku, cmd.qty)
     with uow:
         product = uow.products.get(sku=line.sku)
@@ -48,3 +44,9 @@ def change_batch_quantity(
         product = uow.products.get_by_batchref(batchref=cmd.ref)
         product.change_batch_quantity(ref=cmd.ref, qty=cmd.qty)
         uow.commit()
+
+
+def publish_allocated_event(
+    event: events.Allocated, uow: unit_of_work.AbstractUnitOfWork
+):
+    redis_eventpublisher.publish("line_allocated", event)

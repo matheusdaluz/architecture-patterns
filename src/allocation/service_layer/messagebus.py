@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from domain import commands, events
+from allocation.domain import commands, events
 from typing import List, Dict, Type, Callable, Union
-from services import handlers
-from services import unit_of_work
+from allocation.service_layer import handlers
+from allocation.service_layer import unit_of_work
 
 logger = logging.getLogger(__name__)
 Message = Union[commands.Command, events.Event]
@@ -55,7 +55,8 @@ def handle_command(
 
 
 EVENT_HANDLERS = {
-    events.OutOfStock: [handlers.send_out_of_stock_notification]
+    events.Allocated: [handlers.publish_allocated_event],
+    events.OutOfStock: [handlers.send_out_of_stock_notification],
 }  # type: Dict[Type[events.Event], List[Callable]]
 
 

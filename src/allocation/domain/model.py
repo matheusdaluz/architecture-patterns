@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
-from domain import events, commands
+from allocation.domain import events, commands
 from typing import Optional, NewType, List
 
 Quantity = NewType("Quantity", int)
@@ -82,6 +82,14 @@ class Product:
             batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
             batch.allocate(line)
             self.version_number += 1
+            self.events.append(
+                events.Allocated(
+                    orderid=line.orderid,
+                    sku=line.sku,
+                    qty=line.qty,
+                    batchref=batch.reference,
+                )
+            )
             return batch.reference
         except StopIteration:
             self.events.append(events.OutOfStock(line.sku))
@@ -92,6 +100,4 @@ class Product:
         batch._purchased_quantity = qty
         while batch.available_quantity < 0:
             line = batch.deallocate_one()
-            self.events.append(
-                commands.Allocate(line.orderid, line.sku, line.qty)
-            )
+            self.events.append(commands.Allocate(line.orderid, line.sku, line.qty))

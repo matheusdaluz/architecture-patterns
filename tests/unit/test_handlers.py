@@ -1,8 +1,8 @@
 import pytest
 
-from adapters import repository
-from services import unit_of_work, messagebus, handlers
-from domain import commands
+from allocation.adapters import repository
+from allocation.service_layer import unit_of_work, messagebus, handlers
+from allocation.domain import commands
 from datetime import date
 
 
@@ -52,10 +52,10 @@ def test_add_batch_for_existing_product():
 
 def test_returns_allocation():
     uow = FakeUnitOfWork()
-    messagebus.handle(commands.CreateBatch("batch1", "COMPLICATED-LAMP", 100, None), uow)
-    result = messagebus.handle(
-        commands.Allocate("o1", "COMPLICATED-LAMP", 10), uow
+    messagebus.handle(
+        commands.CreateBatch("batch1", "COMPLICATED-LAMP", 100, None), uow
     )
+    result = messagebus.handle(commands.Allocate("o1", "COMPLICATED-LAMP", 10), uow)
     assert result[0] == "batch1"
 
 

@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request
 
-from domain import model, commands
-from adapters import orm
-from services import messagebus, unit_of_work, handlers
+from allocation.domain import model, commands
+from allocation.adapters import orm
+from allocation.service_layer import messagebus, unit_of_work, handlers
 from datetime import datetime
 
 

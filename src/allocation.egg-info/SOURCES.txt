@@ -1,0 +1,7 @@
+setup.py
+allocation/__init__.py
+allocation/config.py
+allocation.egg-info/PKG-INFO
+allocation.egg-info/SOURCES.txt
+allocation.egg-info/dependency_links.txt
+allocation.egg-info/top_level.txt

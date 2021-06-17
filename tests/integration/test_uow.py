@@ -1,9 +1,11 @@
-import pytest
+# pylint: disable=broad-except
+import threading
 import time
 import traceback
-import threading
-from domain import model
-from services import unit_of_work
+from typing import List
+import pytest
+from allocation.domain import model
+from allocation.service_layer import unit_of_work
 from tests.random_refs import random_sku, random_batchref, random_orderid
 
 
@@ -48,24 +50,26 @@ def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
     assert batchref == "batch1"
 
 
-def test_rollback_uncommited_work_by_default(session_factory):
+def test_rolls_back_uncommitted_work_by_default(session_factory):
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:
         insert_batch(uow.session, "batch1", "MEDIUM-PLINTH", 100, None)
+
     new_session = session_factory()
     rows = list(new_session.execute('SELECT * FROM "batches"'))
     assert rows == []
 
 
-def test_rollback_on_error(session_factory):
+def test_rolls_back_on_error(session_factory):
     class MyException(Exception):
         pass
 
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with pytest.raises(MyException):
         with uow:
-            insert_batch(uow.session, "batch1", "MEDIUM-PLINTH", 100, None)
+            insert_batch(uow.session, "batch1", "LARGE-FORK", 100, None)
             raise MyException()
+
     new_session = session_factory()
     rows = list(new_session.execute('SELECT * FROM "batches"'))
     assert rows == []
@@ -91,7 +95,7 @@ def test_concurrent_updates_to_version_are_not_allowed(postgres_session_factory)
     session.commit()
 
     order1, order2 = random_orderid(1), random_orderid(2)
-    exceptions = []
+    exceptions = []  # type: List[Exception]
     try_to_allocate_order1 = lambda: try_to_allocate(order1, sku, exceptions)
     try_to_allocate_order2 = lambda: try_to_allocate(order2, sku, exceptions)
     thread1 = threading.Thread(target=try_to_allocate_order1)
