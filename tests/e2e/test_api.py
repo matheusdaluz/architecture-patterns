@@ -1,11 +1,12 @@
 import pytest
 from tests.random_refs import random_sku, random_batchref, random_orderid
-from tests.e2e.api_client import post_to_add_batch, post_to_allocate
+from tests.e2e.api_client import post_to_add_batch, post_to_allocate, get_allocation
 
 
 @pytest.mark.usefixtures("postgres_db")
 @pytest.mark.usefixtures("restart_api")
-def test_happy_path_returns_201_and_allocated_batch():
+def test_happy_path_returns_202_and_batch_is_allocated():
+    orderid = random_orderid()
     sku, othersku = random_sku(), random_sku("other")
     early_batch = random_batchref(1)
     later_batch = random_batchref(2)
@@ -15,10 +16,17 @@ def test_happy_path_returns_201_and_allocated_batch():
     post_to_add_batch(early_batch, sku, 100, "2011-01-01")
     post_to_add_batch(other_batch, othersku, 100, None)
 
-    response = post_to_allocate(random_orderid(), sku, 3)
+    response = post_to_allocate(orderid, sku, 3)
 
-    assert response.status_code == 201
-    assert response.json()["batchref"] == early_batch
+    assert response.status_code == 202
+
+    r = get_allocation(orderid)
+    assert r.ok
+    assert r.json() == [
+        {"sku": sku, 
+        "batchref": early_batch
+        },
+    ]
 
 
 @pytest.mark.usefixtures("postgres_db")
@@ -29,3 +37,6 @@ def test_unhappy_path_returns_400_and_error_message():
 
     assert response.status_code == 400
     assert response.json()["message"] == f"Invalid sku {unknown_sku}"
+
+    r = get_allocation(order_id)
+    assert r.status_code == 404

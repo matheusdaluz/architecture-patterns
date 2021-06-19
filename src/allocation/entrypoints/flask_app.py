@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from allocation.domain import model, commands
 from allocation.adapters import orm
 from allocation.service_layer import messagebus, unit_of_work, handlers
+from allocation import views
 from datetime import datetime
 
 
@@ -21,7 +22,7 @@ def allocate_endpoint():
     except (model.OutOfStock, handlers.InvalidSku) as e:
         return jsonify({"message": str(e)}), 400
 
-    return jsonify({"batchref": batchref}), 201
+    return jsonify({"batchref": batchref}), 202
 
 
 @app.route("/add_batch", methods=["POST"])
@@ -34,3 +35,12 @@ def add_batch():
     )
     messagebus.handle(command, unit_of_work.SqlAlchemyUnitOfWork())
     return "OK", 201
+
+
+@app.route("/allocations/<orderid>", methods=["GET"])
+def allocations_view_endpoint(orderid):
+    uow = unit_of_work.SqlAlchemyUnitOfWork()
+    result = views.allocations(orderid, uow)
+    if not result:
+        return "not found", 404
+    return jsonify(result), 200
