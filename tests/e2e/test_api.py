@@ -4,7 +4,6 @@ from tests.e2e.api_client import post_to_add_batch, post_to_allocate, get_alloca
 
 
 @pytest.mark.usefixtures("postgres_db")
-@pytest.mark.usefixtures("restart_api")
 def test_happy_path_returns_202_and_batch_is_allocated():
     orderid = random_orderid()
     sku, othersku = random_sku(), random_sku("other")
@@ -30,7 +29,6 @@ def test_happy_path_returns_202_and_batch_is_allocated():
 
 
 @pytest.mark.usefixtures("postgres_db")
-@pytest.mark.usefixtures("restart_api")
 def test_unhappy_path_returns_400_and_error_message():
     unknown_sku, order_id = random_sku(), random_orderid()
     response = post_to_allocate(order_id, unknown_sku, 20, False)

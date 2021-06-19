@@ -8,7 +8,7 @@ from tests.e2e.redis_client import subscribe_to, publish_message
 
 @pytest.mark.usefixtures("postgres_db")
 @pytest.mark.usefixtures("restart_api")
-# @pytest.mark.usefixtures("restart_redis_pubsub")
+@pytest.mark.usefixtures("restart_redis_pubsub")
 def test_change_batch_quantity_leading_to_reallocation():
     orderid, sku = random_orderid(), random_sku()
     earlier_batch, later_batch = random_batchref("old"), random_batchref("newer")
@@ -33,6 +33,6 @@ def test_change_batch_quantity_leading_to_reallocation():
             if message:
                 messages.append(message)
                 print(messages)
-            data = json.loads(messages[0]["data"])
+            data = json.loads(messages[-1]["data"])
             assert data["orderid"] == orderid
             assert data["batchref"] == later_batch
